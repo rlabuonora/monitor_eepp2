@@ -1,0 +1,32 @@
+# Build and local cache
+.build/
+
+# Node / Playwright
+node_modules/
+e2e/artifacts/
+
+# R session noise
+.Rhistory
+.RData
+.Ruserdata
+
+# IDE / editor noise
+.Rproj.user/
+.vscode/
+
+# Local logs
+*.log
+
+# Legacy source-of-truth repos stay unmanaged by the new top-level repo
+legacy/
+
+# Pipeline inputs and generated outputs
+monitor/data/raw/*
+!monitor/data/raw/.gitkeep
+monitor/data/interim/*
+!monitor/data/interim/.gitkeep
+monitor/data/processed/*
+!monitor/data/processed/.gitkeep
+
+# Keep committed visual baselines
+!e2e/baselines/

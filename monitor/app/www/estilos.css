@@ -1,0 +1,40 @@
+/* ---- OPP palette as CSS variables ---- */
+:root{
+  --opp-blue:#25418E;
+  --opp-dark-blue:#162755;
+  --opp-light-blue:#E2E9F1;
+  --opp-gold:#DAAA00;
+}
+
+/* ---- Navbar override (Bootstrap 5 uses .bg-body-tertiary) ---- */
+.navbar.navbar-default {
+  --bs-bg-opacity:1;
+  background-color: var(--opp-dark-blue) !important;
+}
+.navbar .navbar-brand,
+.navbar .nav-link{ color:#fff !important; }
+.navbar .nav-link.active{ border-bottom:2px solid var(--opp-gold); }
+
+/* ---- Links & buttons ---- */
+a{ color: var(--opp-blue); }
+.btn-primary{ background-color: var(--opp-blue); border-color: var(--opp-blue); }
+.btn-primary:hover{ filter: brightness(0.95); }
+
+/* ---- Utilities / cards (optional) ---- */
+.badge-opp{ background-color: var(--opp-gold); color:#000; }
+.card-opp{ border-left:4px solid var(--opp-blue); background-color:#fff; }
+
+/* ---- Hero/Jumbotron (we’ll use this next) ---- */
+.hero-jumbo{
+  position:relative; min-height:320px;
+  background:url('imagen-encabezadocsa_3.jpg') center/cover no-repeat;
+  border-radius:.5rem; margin:1rem 0; overflow:hidden;
+}
+
+.hero-inner{ position:relative; z-index:1; color:#fff; padding:2rem 1.25rem; }
+@media (min-width:992px){ .hero-inner{ padding:3rem; } }
+
+/* Soft sections */
+.section-soft{ background-color: var(--opp-light-blue); border-radius:.5rem; padding:1rem; }
+/* Footer */
+.footer-opp{ margin-top:2rem; padding:1rem 0; border-top:1px solid #e5e5e5; color:#6c757d; }

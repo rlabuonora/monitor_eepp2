@@ -1,0 +1,152 @@
+{
+  "required_datasets": [
+    {
+      "id": "series_anuales",
+      "description": "Main annual dashboard dataset used by the principal module.",
+      "produced_by": "monitor/pipeline/steps/stage_legacy_app_artifacts.R",
+      "output_path": "monitor/data/processed/series_anuales.rds",
+      "format": "rds",
+      "minimum_schema": {
+        "required_columns": [
+          "empresa",
+          "year",
+          "facet_col",
+          "fill_col",
+          "valor",
+          "valor_2024",
+          "valor_pct_pib",
+          "valor_usd"
+        ],
+        "optional_columns": [],
+        "key_columns": []
+      },
+      "freshness": {},
+      "validation_rules": {
+        "row_count_min": 1,
+        "unique_key": false
+      }
+    },
+    {
+      "id": "series_mensuales",
+      "description": "Monthly dashboard dataset used by the indicadores modules.",
+      "produced_by": "monitor/pipeline/steps/stage_legacy_app_artifacts.R",
+      "output_path": "monitor/data/processed/series_mensuales.rds",
+      "format": "rds",
+      "minimum_schema": {
+        "required_columns": [
+          "fecha",
+          "empresa",
+          "facet_col",
+          "fill_col",
+          "label",
+          "valor",
+          "tipo",
+          "header_code",
+          "sub_header_code",
+          "item_code",
+          "keep"
+        ],
+        "optional_columns": [],
+        "key_columns": []
+      },
+      "freshness": {},
+      "validation_rules": {
+        "row_count_min": 1,
+        "unique_key": false
+      }
+    },
+    {
+      "id": "caja_mensual",
+      "description": "Cash balance dataset for the caja plot in the indicadores modules.",
+      "produced_by": "monitor/pipeline/steps/stage_legacy_app_artifacts.R",
+      "output_path": "monitor/data/processed/caja_mensual.rds",
+      "format": "rds",
+      "minimum_schema": {
+        "required_columns": [
+          "header_code",
+          "sub_header_code",
+          "item_code",
+          "empresa",
+          "saldo",
+          "saldo_minimo_gastos",
+          "saldo_minimo_ingresos",
+          "saldo_minimo",
+          "fecha"
+        ],
+        "optional_columns": [],
+        "key_columns": []
+      },
+      "freshness": {},
+      "validation_rules": {
+        "row_count_min": 1,
+        "unique_key": false
+      }
+    },
+    {
+      "id": "serie_ipc_anual_24",
+      "description": "Annual IPC deflator series used by shared app helpers.",
+      "produced_by": "monitor/pipeline/steps/stage_legacy_app_artifacts.R",
+      "output_path": "monitor/data/processed/serie_ipc_anual_24.rds",
+      "format": "rds",
+      "minimum_schema": {
+        "required_columns": [
+          "year",
+          "ipc_base_24"
+        ],
+        "optional_columns": [],
+        "key_columns": [
+          "year"
+        ]
+      },
+      "freshness": {},
+      "validation_rules": {
+        "row_count_min": 1,
+        "unique_key": true
+      }
+    },
+    {
+      "id": "serie_pib_anual",
+      "description": "Annual nominal PIB series used by shared app helpers.",
+      "produced_by": "monitor/pipeline/steps/stage_legacy_app_artifacts.R",
+      "output_path": "monitor/data/processed/serie_pib_anual.rds",
+      "format": "rds",
+      "minimum_schema": {
+        "required_columns": [
+          "year",
+          "pib_nominal"
+        ],
+        "optional_columns": [],
+        "key_columns": [
+          "year"
+        ]
+      },
+      "freshness": {},
+      "validation_rules": {
+        "row_count_min": 1,
+        "unique_key": true
+      }
+    },
+    {
+      "id": "dolar_promedio_anual",
+      "description": "Annual average USD exchange rate used by shared app helpers.",
+      "produced_by": "monitor/pipeline/steps/stage_legacy_app_artifacts.R",
+      "output_path": "monitor/data/processed/dolar_promedio_anual.rds",
+      "format": "rds",
+      "minimum_schema": {
+        "required_columns": [
+          "year",
+          "dolar_promedio"
+        ],
+        "optional_columns": [],
+        "key_columns": [
+          "year"
+        ]
+      },
+      "freshness": {},
+      "validation_rules": {
+        "row_count_min": 1,
+        "unique_key": true
+      }
+    }
+  ]
+}

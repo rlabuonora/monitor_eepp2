@@ -1,0 +1,79 @@
+required_datasets:
+  - id: series_anuales
+    description: 'Auto-discovered from monitor/app/app.R via static scan. Review and fill in schema details.'
+    produced_by: TODO
+    output_path: monitor/data/processed/series_anuales.rds
+    format: rds
+    minimum_schema:
+      required_columns: []
+      optional_columns: []
+      key_columns: []
+    freshness: {}
+    validation_rules:
+      row_count_min: 1
+      unique_key: false
+  - id: series_mensuales
+    description: 'Auto-discovered from monitor/app/app.R via static scan. Review and fill in schema details.'
+    produced_by: TODO
+    output_path: monitor/data/processed/series_mensuales.rds
+    format: rds
+    minimum_schema:
+      required_columns: []
+      optional_columns: []
+      key_columns: []
+    freshness: {}
+    validation_rules:
+      row_count_min: 1
+      unique_key: false
+  - id: caja_mensual
+    description: 'Auto-discovered from monitor/app/app.R via static scan. Review and fill in schema details.'
+    produced_by: TODO
+    output_path: monitor/data/processed/caja_mensual.rds
+    format: rds
+    minimum_schema:
+      required_columns: []
+      optional_columns: []
+      key_columns: []
+    freshness: {}
+    validation_rules:
+      row_count_min: 1
+      unique_key: false
+  - id: serie_ipc_anual_24
+    description: 'Auto-discovered from monitor/app/R/data.R via static scan. Review and fill in schema details.'
+    produced_by: TODO
+    output_path: monitor/data/processed/serie_ipc_anual_24.rds
+    format: rds
+    minimum_schema:
+      required_columns: []
+      optional_columns: []
+      key_columns: []
+    freshness: {}
+    validation_rules:
+      row_count_min: 1
+      unique_key: false
+  - id: serie_pib_anual
+    description: 'Auto-discovered from monitor/app/R/data.R via static scan. Review and fill in schema details.'
+    produced_by: TODO
+    output_path: monitor/data/processed/serie_pib_anual.rds
+    format: rds
+    minimum_schema:
+      required_columns: []
+      optional_columns: []
+      key_columns: []
+    freshness: {}
+    validation_rules:
+      row_count_min: 1
+      unique_key: false
+  - id: dolar_promedio_anual
+    description: 'Auto-discovered from monitor/app/R/data.R via static scan. Review and fill in schema details.'
+    produced_by: TODO
+    output_path: monitor/data/processed/dolar_promedio_anual.rds
+    format: rds
+    minimum_schema:
+      required_columns: []
+      optional_columns: []
+      key_columns: []
+    freshness: {}
+    validation_rules:
+      row_count_min: 1
+      unique_key: false

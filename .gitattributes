@@ -1,0 +1,30 @@
+* text=auto
+
+# Keep source and shell files LF across Windows and WSL.
+*.R text eol=lf
+*.sh text eol=lf
+*.bash text eol=lf
+Makefile text eol=lf
+Dockerfile text eol=lf
+Dockerfile.* text eol=lf
+*.md text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+
+# Windows-native script types should remain CRLF when added later.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# Treat data artifacts and office files as binary.
+*.xlsx binary
+*.xls binary
+*.rds binary
+*.rda binary
+*.RData binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
