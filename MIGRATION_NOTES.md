@@ -229,6 +229,10 @@ Current environment/config expectations:
 - if `renv.lock` is added later, `make setup` will attempt `renv::restore()`
 - `make e2e` sets `APP_TEST_MODE=1` for deterministic UI rendering
 
+Deployment note:
+
+- If `shiny-server` deploys by cloning this repository directly into `/srv/shiny-server/aplicaciones/<app_name>` and expects a root-level `app.R`, use the root [app.R](/home/opp/dev/monitor_empresas_publicas/app.R). It is a thin wrapper that serves `monitor/app` as the actual Shiny app directory, so the existing nested project structure does not need to change for production.
+
 ## Requirement Discovery
 
 `pipeline/discover_app_requirements.R` performs a static scan of `monitor/app/` and `monitor/shared/R/`.
