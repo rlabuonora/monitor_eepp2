@@ -8,7 +8,7 @@ PIPELINE_INPUTS := $(sort $(wildcard $(ROOT_DIR)/monitor/data/raw/*))
 PIPELINE_SOURCES := $(shell find $(ROOT_DIR)/monitor/pipeline $(ROOT_DIR)/monitor/shared/R $(ROOT_DIR)/pipeline $(ROOT_DIR)/scripts -type f | sort)
 NODE_MODULES_STAMP := $(ROOT_DIR)/node_modules/.e2e-stamp
 
-.PHONY: help setup pipeline app-data verify-data test-pipeline test run-app e2e e2e-update e2e-clean clean all import run
+.PHONY: help setup pipeline app-data verify-data test-pipeline test run-app screenshots screenshots-update e2e e2e-update e2e-clean clean all import run
 
 help:
 	@printf '%s\n' \
@@ -21,6 +21,8 @@ help:
 		'  test-pipeline Run the migrated pipeline test suite.' \
 		'  test          Run all selected tests.' \
 		'  run-app       Start the Shiny app from repo root.' \
+		'  screenshots   Capture and compare app screenshots against visual baselines.' \
+		'  screenshots-update Refresh screenshot baselines intentionally.' \
 		'  e2e           Run headless Playwright UI comparisons against committed baselines.' \
 		'  e2e-update    Refresh E2E screenshot baselines intentionally.' \
 		'  e2e-clean     Remove generated E2E artifacts only.' \
@@ -58,7 +60,7 @@ verify-data:
 
 test-pipeline:
 	@echo '==> Running migrated pipeline tests'
-	@./scripts/run-pipeline-tests.sh
+	@Rscript --vanilla pipeline/tests/run_tests.R
 
 test:
 	@echo '==> Running all selected tests'
@@ -67,6 +69,10 @@ test:
 run-app:
 	@echo '==> Starting Shiny app'
 	@./scripts/run-app.sh
+
+screenshots: e2e
+
+screenshots-update: e2e-update
 
 $(NODE_MODULES_STAMP): $(ROOT_DIR)/package.json
 	@echo '==> Installing E2E Node dependencies'

@@ -5,9 +5,9 @@ extract_year_token <- function(x) {
 }
 
 build_macro_series <- function(series_path) {
-  pib_raw <- read_required_excel(series_path, sheet = "pib")
+  pib_raw <- read_required_excel(series_path, sheet = "pib", col_types = "text")
   pib_year <- extract_year_token(as.character(pib_raw[[1]]))
-  pib_value <- as.numeric(pib_raw[[2]])
+  pib_value <- suppressWarnings(as.numeric(pib_raw[[2]]))
   pib_keep <- !is.na(pib_year) & pib_year >= 2020 & pib_year <= 2024
   pib_nominal_anual <- stats::aggregate(
     pib_value[pib_keep],
@@ -23,9 +23,9 @@ build_macro_series <- function(series_path) {
     data.frame(year = 2025, pib_nominal = pib_2025)
   )
 
-  ipc_raw <- read_required_excel(series_path, sheet = "ipc")
-  ipc_year <- as.numeric(ipc_raw[[1]])
-  ipc_value <- as.numeric(ipc_raw[[3]])
+  ipc_raw <- read_required_excel(series_path, sheet = "ipc", col_types = "text")
+  ipc_year <- suppressWarnings(as.numeric(ipc_raw[[1]]))
+  ipc_value <- suppressWarnings(as.numeric(ipc_raw[[3]]))
   ipc_keep <- !is.na(ipc_year) & ipc_year >= 2020 & ipc_year <= 2024
   ipc_anual <- stats::aggregate(
     ipc_value[ipc_keep],
@@ -42,9 +42,9 @@ build_macro_series <- function(series_path) {
     data.frame(year = 2025, ipc_base_24 = 105.8)
   )
 
-  dolar_raw <- read_required_excel(series_path, sheet = "dolar")
+  dolar_raw <- read_required_excel(series_path, sheet = "dolar", col_types = "text")
   dolar_date <- parse_legacy_date(dolar_raw[[1]])
-  dolar_value <- as.numeric(dolar_raw[[3]])
+  dolar_value <- suppressWarnings(as.numeric(dolar_raw[[3]]))
   dolar_year <- as.integer(format(dolar_date, "%Y"))
   dolar_keep <- !is.na(dolar_year) & dolar_year >= 2020
   dolar_promedio_anual <- stats::aggregate(

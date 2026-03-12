@@ -13,9 +13,13 @@ script_path <- resolve_script_path()
 repo_root <- normalizePath(file.path(dirname(script_path), "..", ".."), winslash = "/", mustWork = TRUE)
 monitor_dir <- file.path(repo_root, "monitor")
 
+Sys.setenv(TZ = Sys.getenv("TZ", unset = "UTC"))
+
 source(file.path(repo_root, "monitor", "shared", "R", "paths.R"), local = TRUE)
 source(file.path(repo_root, "monitor", "shared", "R", "utils.R"), local = TRUE)
 source(file.path(repo_root, "monitor", "shared", "R", "proyecciones.R"), local = TRUE)
+source(file.path(repo_root, "monitor", "shared", "R", "series_artifacts.R"), local = TRUE)
+source(file.path(repo_root, "monitor", "shared", "R", "caja_artifacts.R"), local = TRUE)
 source(file.path(repo_root, "monitor", "pipeline", "steps", "import_proyecciones.R"), local = TRUE)
 source(file.path(repo_root, "monitor", "pipeline", "steps", "stage_legacy_app_artifacts.R"), local = TRUE)
 

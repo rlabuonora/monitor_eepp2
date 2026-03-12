@@ -12,6 +12,14 @@
 - Run the pipeline with `Rscript monitor/pipeline/run_import.R`.
 - Run the app with `R -q -e "shiny::runApp('monitor/app')"`.
 
+## Commands
+
+- Build all app datasets from the Excel files in `monitor/data/raw/`: `make app-data`
+- Run the pipeline test suite: `make test-pipeline`
+- Run the Shiny app: `make run-app`
+- Take app screenshots and compare against visual baselines: `make screenshots`
+- Update screenshot baselines intentionally: `make screenshots-update`
+
 ## Roles
 
 - Orchestrator: manage structure, sequencing, and migration boundaries.

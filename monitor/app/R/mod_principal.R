@@ -75,6 +75,9 @@ principal_server <- function(id, series_anuales) {
       series_anuales |>
         dplyr::mutate(ejecutado_select = .data[[input$units]])
     })
+    latest_year <- shiny::reactive({
+      max(series_anuales$year, na.rm = TRUE)
+    })
 
     common_plot_theme <- ggplot2::theme(
       legend.position = "bottom",
@@ -96,7 +99,7 @@ principal_server <- function(id, series_anuales) {
 
     output$ingresos <- shiny::renderText({
       data() |>
-        dplyr::filter(.data$facet_col == "Ingresos", .data$year == 2025) |>
+        dplyr::filter(.data$facet_col == "Ingresos", .data$year == latest_year()) |>
         dplyr::summarise(total = sum(.data$ejecutado_select), .groups = "drop") |>
         dplyr::mutate(lbl = fmt_amount(.data$total, input$units)) |>
         dplyr::pull(.data$lbl)
@@ -104,7 +107,7 @@ principal_server <- function(id, series_anuales) {
 
     output$resultado <- shiny::renderText({
       data() |>
-        dplyr::filter(.data$facet_col == "Resultado", .data$year == 2025) |>
+        dplyr::filter(.data$facet_col == "Resultado", .data$year == latest_year()) |>
         dplyr::summarise(total = sum(.data$ejecutado_select), .groups = "drop") |>
         dplyr::mutate(lbl = fmt_amount(.data$total, input$units)) |>
         dplyr::pull(.data$lbl)
@@ -112,7 +115,7 @@ principal_server <- function(id, series_anuales) {
 
     output$gastos <- shiny::renderText({
       data() |>
-        dplyr::filter(.data$facet_col == "Gastos", .data$year == 2025) |>
+        dplyr::filter(.data$facet_col == "Gastos", .data$year == latest_year()) |>
         dplyr::summarise(total = sum(.data$ejecutado_select), .groups = "drop") |>
         dplyr::mutate(lbl = fmt_amount(.data$total, input$units)) |>
         dplyr::pull(.data$lbl)
@@ -120,7 +123,7 @@ principal_server <- function(id, series_anuales) {
 
     output$impuestos <- shiny::renderText({
       data() |>
-        dplyr::filter(.data$facet_col == "Impuestos y Transferencias", .data$year == 2025) |>
+        dplyr::filter(.data$facet_col == "Impuestos y Transferencias", .data$year == latest_year()) |>
         dplyr::summarise(total = sum(.data$ejecutado_select), .groups = "drop") |>
         dplyr::mutate(lbl = fmt_amount(.data$total, input$units)) |>
         dplyr::pull(.data$lbl)
@@ -128,7 +131,7 @@ principal_server <- function(id, series_anuales) {
 
     output$inversiones <- shiny::renderText({
       data() |>
-        dplyr::filter(.data$facet_col == "Inversiones", .data$year == 2025) |>
+        dplyr::filter(.data$facet_col == "Inversiones", .data$year == latest_year()) |>
         dplyr::summarise(total = sum(.data$ejecutado_select), .groups = "drop") |>
         dplyr::mutate(lbl = fmt_amount(.data$total, input$units)) |>
         dplyr::pull(.data$lbl)

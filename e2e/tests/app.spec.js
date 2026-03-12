@@ -69,12 +69,18 @@ async function captureAndAssert(page, scenario, step, screenshotTarget) {
     animations: "disabled"
   });
 
-  if (updateBaselines || !fs.existsSync(baselinePath)) {
+  if (updateBaselines) {
     fs.copyFileSync(actualPath, baselinePath);
     if (fs.existsSync(diffPath)) {
       fs.rmSync(diffPath, { force: true });
     }
     return;
+  }
+
+  if (!fs.existsSync(baselinePath)) {
+    throw new Error(
+      `Missing baseline for ${scenario}/${step}. Run make screenshots-update to create ${path.relative(rootDir, baselinePath)}`
+    );
   }
 
   const diffPixels = comparePngs(actualPath, baselinePath, diffPath);
@@ -90,6 +96,22 @@ test.beforeEach(async ({ page }) => {
   await waitForReady(page);
 });
 
+async function openTopLevelTab(page, tabName) {
+  await page.locator(".navbar").getByRole("tab", { name: tabName, exact: true }).click();
+  await page.waitForSelector(`#${tabName}-plot`, {
+    state: "visible",
+    timeout: 30000
+  });
+}
+
+async function openIndicatorView(page, companyId, viewLabelPattern, titlePattern) {
+  const tab = page.locator(`#${companyId}-which_plot`).getByRole("tab", { name: viewLabelPattern });
+  await tab.click();
+  await expect(tab).toHaveAttribute("aria-selected", "true");
+  await expect(page.locator(`#${companyId}-plot_title`)).toContainText(titlePattern);
+  await waitForOutputStable(page, `#${companyId}-plot`);
+}
+
 test("Scenario A: Home loads", async ({ page }) => {
   await captureAndAssert(page, "home_loads", "home_loaded", page);
 });
@@ -100,4 +122,25 @@ test("Scenario B: Critical chart state", async ({ page }) => {
   await waitForOutputStable(page, "#principal-plot_gastos");
 
   await captureAndAssert(page, "critical_chart_state", "after_inputs", page);
+});
+
+test("Scenario C: ANCAP ingresos", async ({ page }) => {
+  await openTopLevelTab(page, "ANCAP");
+  await openIndicatorView(page, "ANCAP", /Ingresos Corrientes/, "Ingresos Corrientes");
+
+  await captureAndAssert(page, "ancap_ingresos", "loaded", page);
+});
+
+test("Scenario D: ANCAP caja", async ({ page }) => {
+  await openTopLevelTab(page, "ANCAP");
+  await openIndicatorView(page, "ANCAP", /Caja/, "Caja Mensual");
+
+  await captureAndAssert(page, "ancap_caja", "loaded", page);
+});
+
+test("Scenario E: UTE gastos", async ({ page }) => {
+  await openTopLevelTab(page, "UTE");
+  await openIndicatorView(page, "UTE", /Gastos/, "Gastos");
+
+  await captureAndAssert(page, "ute_gastos", "loaded", page);
 });
