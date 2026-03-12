@@ -144,3 +144,10 @@ test("Scenario E: UTE gastos", async ({ page }) => {
 
   await captureAndAssert(page, "ute_gastos", "loaded", page);
 });
+
+test("Scenario F: ANP ingresos", async ({ page }) => {
+  await openTopLevelTab(page, "ANP");
+  await openIndicatorView(page, "ANP", /Ingresos Corrientes/, "Ingresos Corrientes");
+
+  await captureAndAssert(page, "anp_ingresos", "loaded", page);
+});

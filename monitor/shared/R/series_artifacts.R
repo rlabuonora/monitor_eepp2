@@ -330,11 +330,22 @@ build_series_mensuales_label_map <- function(estructura_map_empresa) {
   label_map
 }
 
+canonicalize_series_mensuales_label <- function(label) {
+  label_chr <- trimws(as.character(label))
+  label_chr <- gsub("\\s+", " ", label_chr)
+
+  dplyr::case_when(
+    tolower(label_chr) == "otros ingresos" ~ "Otros Ingresos",
+    TRUE ~ label_chr
+  )
+}
+
 standardize_series_mensuales_source <- function(df, tipo, label_map, valor_multiplier = 1) {
   out <- df |>
     normalize_series_mensuales_code_keys() |>
     classify_series_mensuales_rows() |>
-    dplyr::left_join(label_map, by = c("empresa", "header_code", "sub_header_code", "item_code"))
+    dplyr::left_join(label_map, by = c("empresa", "header_code", "sub_header_code", "item_code")) |>
+    dplyr::mutate(label = canonicalize_series_mensuales_label(.data$label))
 
   bad_label <- is.na(out$label) | trimws(as.character(out$label)) == ""
   if (any(bad_label)) {

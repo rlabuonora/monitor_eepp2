@@ -69,6 +69,33 @@ indicadores_server <- function(id, data, caja_mensual) {
       ggiraph::geom_col_interactive(ggplot2::aes(tooltip = .data$tooltip), position = position, ...)
     }
 
+    month_levels <- c("Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sept", "Oct", "Nov", "Dic")
+    tipo_levels <- c("Ejecutado", "Firmado")
+
+    complete_monthly_plot_data <- function(df) {
+      template <- expand.grid(
+        label = levels(df$label),
+        month_label = levels(df$month_label),
+        tipo = tipo_levels,
+        KEEP.OUT.ATTRS = FALSE,
+        stringsAsFactors = FALSE
+      ) |>
+        dplyr::mutate(
+          label = factor(.data$label, levels = levels(df$label)),
+          month_label = factor(.data$month_label, levels = levels(df$month_label)),
+          tipo = factor(.data$tipo, levels = tipo_levels)
+        )
+
+      template |>
+        dplyr::left_join(df, by = c("label", "month_label", "tipo")) |>
+        dplyr::mutate(
+          observed = dplyr::coalesce(.data$observed, FALSE),
+          valor = dplyr::coalesce(.data$valor, 0),
+          tooltip = dplyr::if_else(.data$observed, .data$tooltip, NA_character_),
+          alpha_value = dplyr::if_else(.data$observed, 1, 0)
+        )
+    }
+
     output$plot <- render_girafe_widget({
       if (input$which_plot == "I") {
         linea_label <- if (id %in% entes_minimo_gasto) {
@@ -126,7 +153,14 @@ indicadores_server <- function(id, data, caja_mensual) {
       }
 
       plot_data <- plot_data |>
-        dplyr::mutate(tipo = factor(.data$tipo, levels = c("Ejecutado", "Firmado")))
+        dplyr::mutate(
+          tipo = factor(.data$tipo, levels = tipo_levels),
+          month_label = factor(
+            stringr::str_to_title(scales::label_date("%b", locale = "es")(.data$fecha)),
+            levels = month_levels
+          ),
+          observed = TRUE
+        )
 
       facet_order <- plot_data |>
         dplyr::group_by(.data$label) |>
@@ -135,13 +169,18 @@ indicadores_server <- function(id, data, caja_mensual) {
         dplyr::pull(.data$label)
 
       plot_data <- plot_data |>
-        dplyr::mutate(label = factor(.data$label, levels = facet_order))
+        dplyr::mutate(label = factor(.data$label, levels = facet_order)) |>
+        complete_monthly_plot_data()
 
-      dodge_pos <- ggplot2::position_dodge2(width = 25, preserve = "single")
+      dodge_pos <- ggplot2::position_dodge(width = 0.82)
 
       plot_object <- plot_data |>
-        ggplot2::ggplot(ggplot2::aes(.data$fecha, .data$valor, fill = .data$tipo, group = .data$tipo)) +
-        add_bar_layer(position = dodge_pos) +
+        ggplot2::ggplot(ggplot2::aes(.data$month_label, .data$valor, fill = .data$tipo, group = .data$tipo)) +
+        ggiraph::geom_col_interactive(
+          ggplot2::aes(tooltip = .data$tooltip, alpha = .data$alpha_value),
+          position = dodge_pos,
+          width = 0.72
+        ) +
         ggplot2::scale_fill_manual(
           "",
           values = c(
@@ -151,14 +190,12 @@ indicadores_server <- function(id, data, caja_mensual) {
           breaks = c("Ejecutado", "Firmado"),
           drop = FALSE
         ) +
+        ggplot2::scale_alpha_identity() +
         ggplot2::facet_wrap(~label, scales = "free_y", drop = TRUE) +
         scale_y_millions +
-        ggplot2::scale_x_date(
-          date_breaks = "1 month",
-          labels = function(x) {
-            stringr::str_to_title(scales::label_date("%b", locale = "es")(x))
-          },
-          expand = ggplot2::expansion(mult = c(0, 0))
+        ggplot2::scale_x_discrete(
+          drop = FALSE,
+          expand = ggplot2::expansion(mult = c(0.01, 0.01))
         ) +
         ggplot2::labs(x = "Año", y = "", title = "", fill = "") +
         ggplot2::theme(
