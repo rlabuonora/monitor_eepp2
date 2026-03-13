@@ -26,21 +26,21 @@ a{ color: var(--opp-blue); }
 
 .opp-kpi-stack{
   display:grid;
-  gap:.48rem;
+  gap:.36rem;
 }
 
 .opp-kpi-box{
-  --bslib-value-box-padding: .62rem .78rem;
+  --bslib-value-box-padding: .5rem .68rem;
   min-height: 0;
 }
 
 .opp-kpi-box .value-box-grid{
   align-items:center;
-  column-gap:.58rem;
+  column-gap:.48rem;
 }
 
 .opp-kpi-box .value-box-area{
-  gap:.08rem;
+  gap:.04rem;
 }
 
 .opp-kpi-heading{
@@ -53,14 +53,14 @@ a{ color: var(--opp-blue); }
 
 .opp-kpi-title{
   color: var(--opp-dark-blue);
-  font-size:.8rem;
+  font-size:.76rem;
   font-weight:600;
-  line-height:1.15;
+  line-height:1.1;
 }
 
 .opp-kpi-context{
   color:#657188;
-  font-size:.64rem;
+  font-size:.6rem;
   font-weight:600;
   letter-spacing:.03em;
   line-height:1.1;
@@ -74,11 +74,11 @@ a{ color: var(--opp-blue); }
 
 .opp-kpi-value{
   color: var(--opp-dark-blue);
-  font-size:1.5rem;
+  font-size:1.34rem;
   font-weight:800;
   letter-spacing:-.02em;
   line-height:1;
-  margin-top:.14rem;
+  margin-top:.08rem;
 }
 
 .opp-kpi-value .shiny-text-output{
@@ -88,17 +88,17 @@ a{ color: var(--opp-blue); }
 .opp-kpi-box .value-box-showcase{
   align-self:flex-start;
   color: var(--opp-blue);
-  opacity:.45;
-  font-size:.8rem;
+  opacity:.38;
+  font-size:.72rem;
   line-height:1;
-  margin-top:.08rem;
+  margin-top:.04rem;
 }
 
 .opp-kpi-box .value-box-showcase svg,
 .opp-kpi-box .value-box-showcase i{
-  width:.8rem;
-  height:.8rem;
-  font-size:.8rem;
+  width:.72rem;
+  height:.72rem;
+  font-size:.72rem;
 }
 
 .opp-kpi-box .value-box-value{
