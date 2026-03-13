@@ -30,6 +30,8 @@ indicadores_ui <- function(id, title) {
 
 indicadores_server <- function(id, data, caja_mensual) {
   shiny::moduleServer(id, function(input, output, session) {
+    current_prices_caption <- "Cifras en millones de $ corrientes"
+
     latest_company_year <- function() {
       monthly_dates <- data$fecha[data$empresa == id]
       caja_dates <- caja_mensual$fecha[caja_mensual$empresa == id]
@@ -141,7 +143,7 @@ indicadores_server <- function(id, data, caja_mensual) {
             },
             expand = ggplot2::expansion(mult = c(0, 0))
           ) +
-          ggplot2::labs(x = "Año", y = "", title = "")
+          ggplot2::labs(x = "Año", y = "", title = "", caption = current_prices_caption)
 
         return(make_girafe_widget(plot_object))
       }
@@ -213,10 +215,11 @@ indicadores_server <- function(id, data, caja_mensual) {
           drop = FALSE,
           expand = ggplot2::expansion(mult = c(0.01, 0.01))
         ) +
-        ggplot2::labs(x = "Año", y = "", title = "", fill = "") +
+        ggplot2::labs(x = "Año", y = "", title = "", fill = "", caption = current_prices_caption) +
         ggplot2::theme(
           axis.text.x = ggplot2::element_text(size = 12),
-          strip.text = ggplot2::element_text(size = 12)
+          strip.text = ggplot2::element_text(size = 12),
+          plot.caption = ggplot2::element_text(hjust = 1)
         )
 
       make_girafe_widget(plot_object)

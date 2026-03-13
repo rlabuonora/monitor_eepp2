@@ -63,6 +63,16 @@ ui <- shiny::navbarPage(
   shiny::tabPanel(title = "URSEC", indicadores_ui("URSEC")),
   bslib::nav_spacer(),
   bslib::nav_item(
+    shiny::actionLink(
+      inputId = "open_methodology",
+      label = NULL,
+      icon = shiny::icon("info-circle"),
+      class = "nav-link d-flex align-items-center",
+      title = "Nota metodológica",
+      `aria-label` = "Abrir nota metodológica"
+    )
+  ),
+  bslib::nav_item(
     htmltools::tags$a(
       href = "https://opp-eepp.s3.us-east-1.amazonaws.com/Informe+Octubre+2025.pdf",
       download = NA,
@@ -78,6 +88,28 @@ server <- function(input, output, session) {
   series_anuales <- read_required_dataset("series_anuales")
   series_mensuales <- read_required_dataset("series_mensuales")
   caja_mensual <- read_required_dataset("caja_mensual")
+
+  shiny::observeEvent(input$open_methodology, {
+    shiny::showModal(
+      shiny::modalDialog(
+        title = "Nota metodológica",
+        easyClose = TRUE,
+        footer = shiny::modalButton("Cerrar"),
+        htmltools::tags$p(
+          "Las cifras en precios corrientes se presentan en pesos uruguayos del año correspondiente, sin ajuste por variación de precios."
+        ),
+        htmltools::tags$p(
+          "Las cifras en precios constantes de 2024 se obtienen deflactando los valores corrientes con el IPC reexpresado con base 2024 = 100."
+        ),
+        htmltools::tags$p(
+          "Las cifras en millones de USD se calculan convirtiendo los montos corrientes con el tipo de cambio promedio anual 2025 ($39.86)"
+        ),
+        htmltools::tags$p(
+          "Las cifras como % del PIB se calculan sobre el PIB nominal anual. Para 2025, mientras no exista cierre anual observado, se utiliza un PIB nominal anual proyectado con un crecimiento de 2,5%."
+        )
+      )
+    )
+  })
 
   principal_server("principal", series_anuales)
   indicadores_server("ANCAP", series_mensuales, caja_mensual)
