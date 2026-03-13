@@ -5,6 +5,30 @@ opp_cols <- list(
   light_blue = "#1B9E77"
 )
 
+app_monetary_methodology <- function() {
+  default_monetary_methodology()
+}
+
+annual_unit_choices <- function() {
+  monetary_unit_choices("annual", methodology = app_monetary_methodology())
+}
+
+annual_unit_choice_list <- function() {
+  choices <- annual_unit_choices()
+  stats::setNames(as.list(unname(choices)), names(choices))
+}
+
+load_app_macro_series <- function(methodology = app_monetary_methodology()) {
+  macro_series <- list(
+    ipc_anual = read_required_dataset(methodology$reference_series$ipc$dataset_id),
+    pib_nominal_anual = read_required_dataset(methodology$reference_series$pib$dataset_id),
+    dolar_promedio_anual = read_required_dataset(methodology$reference_series$exchange_rate$dataset_id)
+  )
+
+  validate_monetary_reference_series(macro_series, methodology = methodology)
+  macro_series
+}
+
 entes_minimo_ingreso <- c("ANP", "ANTEL", "OSE", "URSEA", "URSEC", "UTE")
 entes_minimo_gasto <- c("AFE", "ANCAP", "ANCO", "ANV", "INC")
 
@@ -103,11 +127,11 @@ escala_y <- function(unidad) {
   switch(
     unidad,
     valor = ggplot2::scale_y_continuous(labels = scales::dollar_format(scale = 1e-6)),
-    valor_usd = ggplot2::scale_y_continuous(labels = scales::dollar_format(prefix = "USD ", scale = 1e-6)),
+    valor_usd = ggplot2::scale_y_continuous(labels = scales::dollar_format(prefix = "US$ ", scale = 1e-6)),
     valor_2024 = ggplot2::scale_y_continuous(labels = scales::dollar_format(scale = 1e-6)),
     valor_pct_pib = ggplot2::scale_y_continuous(labels = scales::percent_format(scale = 100)),
     ejecutado = ggplot2::scale_y_continuous(labels = scales::dollar_format(scale = 1e-6)),
-    ejecutado_usd = ggplot2::scale_y_continuous(labels = scales::dollar_format(prefix = "USD ", scale = 1e-6)),
+    ejecutado_usd = ggplot2::scale_y_continuous(labels = scales::dollar_format(prefix = "US$ ", scale = 1e-6)),
     ejecutado_2024 = ggplot2::scale_y_continuous(labels = scales::dollar_format(scale = 1e-6)),
     ejecutado_pct_pib = ggplot2::scale_y_continuous(labels = scales::percent_format(scale = 100))
   )
@@ -122,27 +146,12 @@ agregar_deflactores <- function(df) {
     stop("Error: data frame must have a numeric column named 'ejecutado'.", call. = FALSE)
   }
 
-  ipc_anual <- read_required_dataset("serie_ipc_anual_24") |>
-    dplyr::add_row(year = 2025, ipc_base_24 = 105.8)
-
-  tasa_crecimiento_pib <- 0.025
-  pib_nominal_anual <- read_required_dataset("serie_pib_anual")
-  pib_nominal_proyectado_25 <- (1 + tasa_crecimiento_pib) *
-    dplyr::pull(utils::tail(pib_nominal_anual, 1), pib_nominal)
-
-  pib_nominal_anual <- pib_nominal_anual |>
-    dplyr::add_row(year = 2025, pib_nominal = pib_nominal_proyectado_25)
-
-  dolar_promedio_anual <- read_required_dataset("dolar_promedio_anual")
-
-  df |>
-    dplyr::left_join(ipc_anual, by = "year") |>
-    dplyr::left_join(pib_nominal_anual, by = "year") |>
-    dplyr::left_join(dolar_promedio_anual, by = "year") |>
-    dplyr::mutate(
-      ejecutado_2024 = 100 * .data$ejecutado / .data$ipc_base_24,
-      ejecutado_pct_pib = .data$ejecutado / .data$pib_nominal,
-      ejecutado_usd = .data$ejecutado / .data$dolar_promedio
-    ) |>
-    dplyr::select(-.data$ipc_base_24, -.data$pib_nominal, -.data$dolar_promedio)
+  methodology <- app_monetary_methodology()
+  augment_monetary_measures(
+    df,
+    nominal_col = "ejecutado",
+    macro_series = load_app_macro_series(methodology = methodology),
+    methodology = methodology,
+    output_cols = methodology$output_columns$projection[c("constant", "pct_pib", "usd")]
+  )
 }

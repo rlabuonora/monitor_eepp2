@@ -12,7 +12,9 @@ required_series_source_filenames <- function() {
     sprintf("%d.xlsx", 2020:2025),
     "estructura2.xlsx",
     "firmados.xlsx",
-    "series.xlsx"
+    "ipc_gral_y_variaciones_base_2022.xlsx",
+    "cotizacion_monedas.xlsx",
+    "actividades_c.xlsx"
   )
 }
 
@@ -419,8 +421,7 @@ standardize_series_mensuales_source <- function(df, tipo, label_map, valor_multi
 }
 
 build_series_anuales_native <- function(ejecucion_mensual, macro_series) {
-  ipc_anual <- macro_series$ipc_anual
-  pib_nominal_anual <- macro_series$pib_nominal_anual
+  methodology <- default_monetary_methodology()
 
   dplyr::bind_rows(
     dplyr::filter(ejecucion_mensual, header_code == "A", is.na(sub_header_code), is.na(item_code)),
@@ -453,13 +454,11 @@ build_series_anuales_native <- function(ejecucion_mensual, macro_series) {
     ) |>
     dplyr::group_by(.data$empresa, .data$year, .data$facet_col, .data$fill_col) |>
     dplyr::summarise(valor = sum(.data$valor), .groups = "drop") |>
-    dplyr::left_join(ipc_anual, by = "year") |>
-    dplyr::left_join(pib_nominal_anual, by = "year") |>
-    dplyr::left_join(macro_series$dolar_promedio_anual, by = "year") |>
-    dplyr::mutate(
-      valor_2024 = 100 * .data$valor / .data$ipc_base_24,
-      valor_pct_pib = .data$valor / .data$pib_nominal,
-      valor_usd = .data$valor / .data$dolar_promedio
+    augment_monetary_measures(
+      nominal_col = "valor",
+      macro_series = macro_series,
+      methodology = methodology,
+      output_cols = methodology$output_columns$annual[c("constant", "pct_pib", "usd")]
     ) |>
     dplyr::select("empresa", "year", "facet_col", "fill_col", "valor", "valor_2024", "valor_pct_pib", "valor_usd")
 }
@@ -487,7 +486,6 @@ build_native_series_artifacts <- function(monitor_dir) {
   assert_required_series_sources(monitor_dir)
 
   estructura_path <- monitor_path("data", "raw", "estructura2.xlsx", monitor_dir = monitor_dir)
-  series_path <- monitor_path("data", "raw", "series.xlsx", monitor_dir = monitor_dir)
   firmado_path <- monitor_path("data", "raw", "firmados.xlsx", monitor_dir = monitor_dir)
   firmado_v2_path <- monitor_path("data", "raw", "firmados2.xlsx", monitor_dir = monitor_dir)
 
@@ -502,7 +500,7 @@ build_native_series_artifacts <- function(monitor_dir) {
     template_path = firmado_path
   )
   firmado_mensual <- build_firmado_mensual_native(firmado_raw)
-  macro_series <- build_macro_series(series_path)
+  macro_series <- build_macro_series(monitor_path("data", "raw", monitor_dir = monitor_dir))
 
   list(
     estructura_map = maps$estructura_map,

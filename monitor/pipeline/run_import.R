@@ -17,6 +17,7 @@ Sys.setenv(TZ = Sys.getenv("TZ", unset = "UTC"))
 
 source(file.path(repo_root, "monitor", "shared", "R", "paths.R"), local = TRUE)
 source(file.path(repo_root, "monitor", "shared", "R", "utils.R"), local = TRUE)
+source(file.path(repo_root, "monitor", "shared", "R", "monetary_methodology.R"), local = TRUE)
 source(file.path(repo_root, "monitor", "shared", "R", "proyecciones.R"), local = TRUE)
 source(file.path(repo_root, "monitor", "shared", "R", "series_artifacts.R"), local = TRUE)
 source(file.path(repo_root, "monitor", "shared", "R", "caja_artifacts.R"), local = TRUE)

@@ -20,6 +20,7 @@ app_bootstrap_file <- resolve_app_bootstrap_file()
 app_dir <- dirname(app_bootstrap_file)
 
 source(file.path(app_dir, "..", "shared", "R", "bootstrap.R"), local = TRUE)
+source(file.path(app_dir, "..", "shared", "R", "monetary_methodology.R"), local = TRUE)
 source(project_path("pipeline", "common.R"), local = TRUE)
 source(file.path(app_dir, "R", "data_access.R"), local = TRUE)
 

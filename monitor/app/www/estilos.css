@@ -24,6 +24,87 @@ a{ color: var(--opp-blue); }
 .badge-opp{ background-color: var(--opp-gold); color:#000; }
 .card-opp{ border-left:4px solid var(--opp-blue); background-color:#fff; }
 
+.opp-kpi-stack{
+  display:grid;
+  gap:.48rem;
+}
+
+.opp-kpi-box{
+  --bslib-value-box-padding: .62rem .78rem;
+  min-height: 0;
+}
+
+.opp-kpi-box .value-box-grid{
+  align-items:center;
+  column-gap:.58rem;
+}
+
+.opp-kpi-box .value-box-area{
+  gap:.08rem;
+}
+
+.opp-kpi-heading{
+  display:flex;
+  align-items:baseline;
+  gap:.28rem;
+  min-width:0;
+  flex-wrap:wrap;
+}
+
+.opp-kpi-title{
+  color: var(--opp-dark-blue);
+  font-size:.8rem;
+  font-weight:600;
+  line-height:1.15;
+}
+
+.opp-kpi-context{
+  color:#657188;
+  font-size:.64rem;
+  font-weight:600;
+  letter-spacing:.03em;
+  line-height:1.1;
+  white-space:nowrap;
+  opacity:.92;
+}
+
+.opp-kpi-context .shiny-text-output{
+  display:inline;
+}
+
+.opp-kpi-value{
+  color: var(--opp-dark-blue);
+  font-size:1.5rem;
+  font-weight:800;
+  letter-spacing:-.02em;
+  line-height:1;
+  margin-top:.14rem;
+}
+
+.opp-kpi-value .shiny-text-output{
+  display:inline;
+}
+
+.opp-kpi-box .value-box-showcase{
+  align-self:flex-start;
+  color: var(--opp-blue);
+  opacity:.45;
+  font-size:.8rem;
+  line-height:1;
+  margin-top:.08rem;
+}
+
+.opp-kpi-box .value-box-showcase svg,
+.opp-kpi-box .value-box-showcase i{
+  width:.8rem;
+  height:.8rem;
+  font-size:.8rem;
+}
+
+.opp-kpi-box .value-box-value{
+  margin-top:0;
+}
+
 /* ---- Hero/Jumbotron (we’ll use this next) ---- */
 .hero-jumbo{
   position:relative; min-height:320px;

@@ -8,12 +8,11 @@ run_import_proyecciones <- function(monitor_dir) {
   ensure_dir(processed_dir)
 
   proyeccion_path <- file.path(raw_dir, "proyeccion.xlsx")
-  series_path <- file.path(raw_dir, "series.xlsx")
   output_path <- file.path(processed_dir, "proyecciones.rds")
 
   proyecciones <- build_proyecciones(
     proyeccion_path = proyeccion_path,
-    series_path = series_path
+    raw_dir = raw_dir
   )
 
   saveRDS(proyecciones, output_path)
