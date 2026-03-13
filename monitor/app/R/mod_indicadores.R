@@ -30,15 +30,31 @@ indicadores_ui <- function(id, title) {
 
 indicadores_server <- function(id, data, caja_mensual) {
   shiny::moduleServer(id, function(input, output, session) {
+    latest_company_year <- function() {
+      monthly_dates <- data$fecha[data$empresa == id]
+      caja_dates <- caja_mensual$fecha[caja_mensual$empresa == id]
+      all_dates <- c(monthly_dates, caja_dates)
+      all_dates <- all_dates[!is.na(all_dates)]
+
+      if (length(all_dates) == 0) {
+        return(NA_integer_)
+      }
+
+      as.integer(format(max(all_dates), "%Y"))
+    }
+
     output$plot_title <- shiny::renderText({
+      title_year <- latest_company_year()
+      year_suffix <- if (is.na(title_year)) "" else stringr::str_c(" ", title_year)
+
       switch(
         input$which_plot,
-        Ingresos = stringr::str_c(id, " - Ingresos Corrientes"),
-        Gastos = stringr::str_c(id, " - Gastos"),
-        `Impuestos y Transferencias` = stringr::str_c(id, " - Transferencias e impuestos"),
-        Inversiones = stringr::str_c(id, " - Inversiones"),
-        Resultado = stringr::str_c(id, " - Resultado"),
-        I = stringr::str_c(id, " - Caja Mensual")
+        Ingresos = stringr::str_c(id, " - Ingresos Corrientes", year_suffix),
+        Gastos = stringr::str_c(id, " - Gastos", year_suffix),
+        `Impuestos y Transferencias` = stringr::str_c(id, " - Transferencias e impuestos", year_suffix),
+        Inversiones = stringr::str_c(id, " - Inversiones", year_suffix),
+        Resultado = stringr::str_c(id, " - Resultado", year_suffix),
+        I = stringr::str_c(id, " - Caja Mensual", year_suffix)
       )
     })
 

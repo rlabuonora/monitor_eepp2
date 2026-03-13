@@ -152,25 +152,71 @@ firmado_meses_default <- function() {
   c("enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "setiembre", "octubre", "noviembre", "diciembre")
 }
 
-build_firmado_raw_native <- function(path, estructura_map_empresa, hojas = firmado_empresas_default(), range = "A1:P66", year = 2025L) {
-  hojas <- unique(hojas)
-  meses <- firmado_meses_default()
+filter_firmado_sheet_rows <- function(df, month_cols) {
+  concept <- as.character(df[["concepto"]])
+  concept[is.na(concept)] <- ""
+  concept <- trimws(gsub("[[:space:]]+", " ", concept))
 
+  month_data <- df[, month_cols, drop = FALSE]
+  month_data[] <- lapply(month_data, function(x) suppressWarnings(as.numeric(x)))
+  has_data <- rowSums(!is.na(as.matrix(month_data)) & as.matrix(month_data) != 0) > 0
+
+  df |>
+    dplyr::mutate(concepto = concept) |>
+    dplyr::filter(.data$concepto != "", has_data)
+}
+
+add_firmado_occurrence <- function(df) {
+  df |>
+    dplyr::group_by(.data$concepto) |>
+    dplyr::mutate(concept_occurrence = dplyr::row_number()) |>
+    dplyr::ungroup()
+}
+
+build_firmado_raw_from_template <- function(source_path, template_path, hojas, range, meses, year) {
   importar_hoja <- function(hoja) {
-    hoja_raw <- readxl::read_excel(path, range = range, sheet = hoja) |>
-      clean_monitor_excel_names() |>
-      dplyr::filter(!is.na(.data$header)) |>
-      dplyr::relocate(header, sub_header, item, .after = concepto)
+    source_raw <- readxl::read_excel(source_path, range = range, sheet = hoja, .name_repair = "minimal") |>
+      clean_monitor_excel_names()
+    template_raw <- readxl::read_excel(template_path, range = range, sheet = hoja, .name_repair = "minimal") |>
+      clean_monitor_excel_names()
 
-    month_cols <- setdiff(names(hoja_raw), c("concepto", "header", "sub_header", "item"))
-    dplyr::bind_rows(lapply(month_cols, function(month_col) {
+    source_month_cols <- intersect(names(source_raw), meses)
+    template_month_cols <- intersect(names(template_raw), meses)
+    if (length(source_month_cols) != length(meses) || length(template_month_cols) != length(meses)) {
+      stop(sprintf("Missing expected month columns in firmado sheet '%s'.", hoja), call. = FALSE)
+    }
+
+    source_rows <- filter_firmado_sheet_rows(
+      source_raw |>
+        dplyr::select(dplyr::any_of(c("concepto", source_month_cols))),
+      source_month_cols
+    ) |>
+      add_firmado_occurrence()
+
+    template_rows <- filter_firmado_sheet_rows(
+      template_raw |>
+        dplyr::select(dplyr::any_of(c("header", "sub_header", "item", "concepto", template_month_cols))),
+      template_month_cols
+    ) |>
+      add_firmado_occurrence() |>
+      dplyr::select("concepto", "concept_occurrence", "header", "sub_header", "item")
+
+    matched_rows <- source_rows |>
+      dplyr::inner_join(template_rows, by = c("concepto", "concept_occurrence"))
+
+    dropped_rows <- nrow(source_rows) - nrow(matched_rows)
+    if (dropped_rows > 0) {
+      message(sprintf("Dropped %d unmatched firmado row(s) from sheet '%s'.", dropped_rows, hoja))
+    }
+
+    dplyr::bind_rows(lapply(source_month_cols, function(month_col) {
       data.frame(
-        concepto = hoja_raw$concepto,
-        header = hoja_raw$header,
-        sub_header = hoja_raw$sub_header,
-        item = hoja_raw$item,
+        concepto = matched_rows$concepto,
+        header = matched_rows$header,
+        sub_header = matched_rows$sub_header,
+        item = matched_rows$item,
         mes = month_col,
-        firmado = hoja_raw[[month_col]],
+        firmado = matched_rows[[month_col]],
         stringsAsFactors = FALSE
       )
     })) |>
@@ -192,6 +238,13 @@ build_firmado_raw_native <- function(path, estructura_map_empresa, hojas = firma
       )
   }
 
+  dplyr::bind_rows(lapply(hojas, importar_hoja))
+}
+
+build_firmado_raw_native <- function(path, estructura_map_empresa, hojas = firmado_empresas_default(), range = "A1:P66", year = 2025L, template_path = path) {
+  hojas <- unique(hojas)
+  meses <- firmado_meses_default()
+
   labels_map <- estructura_map_empresa |>
     dplyr::transmute(
       empresa = .data$empresa,
@@ -201,7 +254,14 @@ build_firmado_raw_native <- function(path, estructura_map_empresa, hojas = firma
       label = .data$rubro
     )
 
-  dplyr::bind_rows(lapply(hojas, importar_hoja)) |>
+  build_firmado_raw_from_template(
+    source_path = path,
+    template_path = template_path,
+    hojas = hojas,
+    range = range,
+    meses = meses,
+    year = year
+  ) |>
     dplyr::group_by(.data$empresa, .data$fecha, .data$header_code, .data$sub_header_code, .data$item_code) |>
     dplyr::summarise(
       valor = sum(.data$valor, na.rm = TRUE),
@@ -429,11 +489,18 @@ build_native_series_artifacts <- function(monitor_dir) {
   estructura_path <- monitor_path("data", "raw", "estructura2.xlsx", monitor_dir = monitor_dir)
   series_path <- monitor_path("data", "raw", "series.xlsx", monitor_dir = monitor_dir)
   firmado_path <- monitor_path("data", "raw", "firmados.xlsx", monitor_dir = monitor_dir)
+  firmado_v2_path <- monitor_path("data", "raw", "firmados2.xlsx", monitor_dir = monitor_dir)
 
   maps <- build_estructura_maps(estructura_path)
   ejecucion_mensual <- build_ejecucion_mensual_native(monitor_dir, maps$estructura_map)
   latest_year <- max(ejecucion_mensual$year, na.rm = TRUE)
-  firmado_raw <- build_firmado_raw_native(firmado_path, maps$estructura_map_empresa, year = latest_year)
+  firmado_source_path <- if (file.exists(firmado_v2_path)) firmado_v2_path else firmado_path
+  firmado_raw <- build_firmado_raw_native(
+    firmado_source_path,
+    maps$estructura_map_empresa,
+    year = latest_year,
+    template_path = firmado_path
+  )
   firmado_mensual <- build_firmado_mensual_native(firmado_raw)
   macro_series <- build_macro_series(series_path)
 

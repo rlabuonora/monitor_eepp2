@@ -18,7 +18,9 @@ prepare_dashboard_series_mensuales <- function(series_mensuales) {
   series_mensuales |>
     dplyr::mutate(
       keep = dplyr::case_when(
-        .data$header_code == "A" ~ .data$sub_header_code != 0 & .data$item_code == 0,
+        .data$header_code == "A" ~
+          (.data$sub_header_code == 1 & .data$item_code == 0) |
+          (.data$sub_header_code == 2 & .data$item_code == 0),
         .data$header_code == "B" ~
           (.data$sub_header_code == 1 & .data$item_code == 0) |
           (.data$sub_header_code == 2 & .data$item_code != 0) |
@@ -30,6 +32,7 @@ prepare_dashboard_series_mensuales <- function(series_mensuales) {
       ),
       label = dplyr::if_else(.data$facet_col == "Resultado", "Resultado", .data$label)
     ) |>
+    dplyr::filter(.data$keep) |>
     dplyr::filter(abs(.data$valor) > 1)
 }
 

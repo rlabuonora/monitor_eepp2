@@ -2,11 +2,8 @@ SHELL := /bin/bash
 .DEFAULT_GOAL := help
 
 ROOT_DIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
-BUILD_DIR := $(ROOT_DIR)/.build
-PIPELINE_STAMP := $(BUILD_DIR)/pipeline.stamp
-PIPELINE_INPUTS := $(sort $(wildcard $(ROOT_DIR)/monitor/data/raw/*))
-PIPELINE_SOURCES := $(shell find $(ROOT_DIR)/monitor/pipeline $(ROOT_DIR)/monitor/shared/R $(ROOT_DIR)/pipeline $(ROOT_DIR)/scripts -type f | sort)
 NODE_MODULES_STAMP := $(ROOT_DIR)/node_modules/.e2e-stamp
+E2E_ARTIFACT_RUN_ID := current
 
 .PHONY: help setup pipeline app-data verify-data test-pipeline test run-app screenshots screenshots-update e2e e2e-update e2e-clean clean all import run
 
@@ -35,7 +32,6 @@ setup:
 	esac
 	@command -v Rscript >/dev/null || { echo 'Error: Rscript is required but was not found in PATH.' >&2; exit 1; }
 	@command -v R >/dev/null || { echo 'Error: R is required but was not found in PATH.' >&2; exit 1; }
-	@mkdir -p "$(BUILD_DIR)"
 	@if [ -f "$(ROOT_DIR)/renv.lock" ]; then \
 		echo '==> Restoring renv environment'; \
 		Rscript --vanilla -e "if (!requireNamespace('renv', quietly = TRUE)) stop('renv.lock is present but package renv is not installed. Install renv in this R environment first.', call. = FALSE); renv::restore(prompt = FALSE)"; \
@@ -44,13 +40,9 @@ setup:
 	fi
 	@Rscript --vanilla -e "cat('R runtime available.\\n')"
 
-pipeline: $(PIPELINE_STAMP)
-
-$(PIPELINE_STAMP): $(PIPELINE_SOURCES) $(PIPELINE_INPUTS)
-	@mkdir -p "$(BUILD_DIR)"
+pipeline:
 	@echo '==> Running pipeline'
 	@./scripts/run-pipeline.sh
-	@touch "$(PIPELINE_STAMP)"
 
 app-data: pipeline verify-data
 
@@ -84,13 +76,15 @@ e2e: app-data $(NODE_MODULES_STAMP)
 	@echo '==> Ensuring Playwright Chromium is installed'
 	@npx playwright install chromium
 	@echo '==> Running E2E visual regression checks'
-	@E2E_RUN_ID="$$(date +%Y%m%dT%H%M%S)" APP_TEST_MODE=1 npx playwright test --config=e2e/playwright.config.js
+	@rm -rf "$(ROOT_DIR)/e2e/artifacts/$(E2E_ARTIFACT_RUN_ID)"
+	@E2E_RUN_ID="$(E2E_ARTIFACT_RUN_ID)" APP_TEST_MODE=1 npx playwright test --config=e2e/playwright.config.js
 
 e2e-update: app-data $(NODE_MODULES_STAMP)
 	@echo '==> Ensuring Playwright Chromium is installed'
 	@npx playwright install chromium
 	@echo '==> Updating E2E baselines (destructive)'
-	@E2E_RUN_ID="baseline-update-$$(date +%Y%m%dT%H%M%S)" E2E_UPDATE_BASELINES=1 APP_TEST_MODE=1 npx playwright test --config=e2e/playwright.config.js
+	@rm -rf "$(ROOT_DIR)/e2e/artifacts/$(E2E_ARTIFACT_RUN_ID)"
+	@E2E_RUN_ID="$(E2E_ARTIFACT_RUN_ID)" E2E_UPDATE_BASELINES=1 APP_TEST_MODE=1 npx playwright test --config=e2e/playwright.config.js
 
 e2e-clean:
 	@echo '==> Removing E2E artifacts'
@@ -101,7 +95,6 @@ clean:
 	@if [ -d "$(ROOT_DIR)/monitor/data/interim" ]; then find "$(ROOT_DIR)/monitor/data/interim" -mindepth 1 -maxdepth 1 -exec rm -rf {} +; fi
 	@if [ -d "$(ROOT_DIR)/monitor/data/processed" ]; then find "$(ROOT_DIR)/monitor/data/processed" -mindepth 1 -maxdepth 1 -exec rm -rf {} +; fi
 	@if [ -d "$(ROOT_DIR)/e2e/artifacts" ]; then find "$(ROOT_DIR)/e2e/artifacts" -mindepth 1 -maxdepth 1 -exec rm -rf {} +; fi
-	@rm -rf "$(BUILD_DIR)"
 
 all: setup app-data test
 
